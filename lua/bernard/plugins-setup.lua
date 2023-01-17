@@ -31,7 +31,10 @@ return packer.startup(function(use)
 
 	use("nvim-lua/plenary.nvim")
 
+	use("marko-cerovac/material.nvim")
 	use("bluz71/vim-nightfly-guicolors")
+	use("lunarvim/colorschemes")
+	use("lunarvim/darkplus.nvim")
 
 	use("christoomey/vim-tmux-navigator")
 	use("szw/vim-maximizer")
@@ -96,6 +99,7 @@ return packer.startup(function(use)
 
 	-- git signs
 	use("lewis6991/gitsigns.nvim")
+	use("tpope/vim-fugitive")
 
 	if packer_bootstrap then
 		require("packer").sync()
