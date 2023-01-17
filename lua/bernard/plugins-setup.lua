@@ -103,6 +103,9 @@ return packer.startup(function(use)
 	--git integration
 	use("tpope/vim-fugitive")
 
+	-- copilot
+	use("github/copilot.vim")
+
 	if packer_bootstrap then
 		require("packer").sync()
 	end
