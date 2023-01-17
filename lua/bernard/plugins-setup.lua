@@ -31,10 +31,14 @@ return packer.startup(function(use)
 
 	use("nvim-lua/plenary.nvim")
 
-	use("marko-cerovac/material.nvim")
+	-- themes
 	use("bluz71/vim-nightfly-guicolors")
 	use("lunarvim/colorschemes")
 	use("lunarvim/darkplus.nvim")
+	use("danilo-augusto/vim-afterglow")
+
+	-- transparancy
+	use("xiyaowong/nvim-transparent")
 
 	use("christoomey/vim-tmux-navigator")
 	use("szw/vim-maximizer")

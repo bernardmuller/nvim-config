@@ -6,7 +6,7 @@ end
 vim.g.loaded = 1
 vim.g.loaded_netrwPlugin = 1
 
-vim.cmd([[ highlight NvimTreeIndentMarker guifg=#d2c757 ]])
+vim.cmd([[ highlight NvimTreeIndentMarker guifg=#d8d8d8 ]])
 
 nvimtree.setup({
 	renderer = {
