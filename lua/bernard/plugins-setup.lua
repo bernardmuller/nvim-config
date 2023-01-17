@@ -99,6 +99,8 @@ return packer.startup(function(use)
 
 	-- git signs
 	use("lewis6991/gitsigns.nvim")
+
+	--git integration
 	use("tpope/vim-fugitive")
 
 	if packer_bootstrap then
