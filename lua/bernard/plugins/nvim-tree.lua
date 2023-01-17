@@ -6,7 +6,7 @@ end
 vim.g.loaded = 1
 vim.g.loaded_netrwPlugin = 1
 
-vim.cmd([[ highlight NvimTreeIndentMarker guifg=#3FC5FF ]])
+vim.cmd([[ highlight NvimTreeIndentMarker guifg=#d2c757 ]])
 
 nvimtree.setup({
 	renderer = {
@@ -25,5 +25,8 @@ nvimtree.setup({
 				enable = false,
 			},
 		},
+	},
+	view = {
+		side = "right",
 	},
 })

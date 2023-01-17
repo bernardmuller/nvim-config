@@ -1,5 +1,5 @@
-vim.g.material_style = "deep ocean"
-local status, _ = pcall(vim.cmd, "colorscheme material")
+-- vim.g.material_style = "deep ocean"
+local status, _ = pcall(vim.cmd, "colorscheme tomorrow")
 if not status then
 	print("Colorscheme not found!")
 	return
