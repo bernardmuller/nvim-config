@@ -32,10 +32,10 @@ return packer.startup(function(use)
 	use("nvim-lua/plenary.nvim")
 
 	-- themes
-	use("bluz71/vim-nightfly-guicolors")
 	use("lunarvim/colorschemes")
-	use("lunarvim/darkplus.nvim")
 	use("danilo-augusto/vim-afterglow")
+	use("rose-pine/neovim")
+	use("sainnhe/sonokai")
 
 	-- transparancy
 	use("xiyaowong/nvim-transparent")
@@ -109,6 +109,9 @@ return packer.startup(function(use)
 
 	-- copilot
 	use("github/copilot.vim")
+
+	-- better search and navigate
+	use("ggandor/leap.nvim")
 
 	if packer_bootstrap then
 		require("packer").sync()

@@ -1,4 +1,4 @@
-local opt = vim.opt 
+local opt = vim.opt
 
 -- numbers
 opt.relativenumber = true
@@ -17,7 +17,7 @@ opt.wrap = false
 opt.ignorecase = true
 opt.smartcase = true
 
--- cursor line 
+-- cursor line
 opt.cursorline = true
 
 -- appearance
@@ -38,4 +38,17 @@ opt.splitbelow = true
 -- dash
 opt.iskeyword:append("-")
 
-
+-- general
+opt.backup = false
+opt.completeopt = "menuone,noselect"
+opt.fileencoding = "utf-8"
+opt.hlsearch = true
+opt.mouse = "a"
+opt.swapfile = false
+opt.undofile = true
+opt.updatetime = 300
+opt.expandtab = true
+opt.shiftwidth = 2
+opt.tabstop = 2
+opt.smartindent = true
+opt.cmdheight = 2

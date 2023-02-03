@@ -31,3 +31,32 @@ keymap.set("n", "<leader>fs", "<cmd>Telescope live_grep<cr>")
 keymap.set("n", "<leader>fc", "<cmd>Telescope grep_string<cr>")
 keymap.set("n", "<leader>fb", "<cmd>Telescope buffers<cr>")
 keymap.set("n", "<leader>fh", "<cmd>Telescope Telescope help_tags<cr>")
+
+-- move code
+keymap.set("v", "J", ":m '>+1<CR>gv=gv")
+keymap.set("v", "K", ":m '<-2<CR>gv=gv")
+
+-- overwrite J to append bottom line to end of current and KEEP cursor position
+keymap.set("n", "J", "mzJ`z")
+
+-- half page up and down
+keymap.set("n", "<C-.>", "<C-d>zz")
+keymap.set("n", "<C-,>", "<C-u>zz")
+
+-- keep cursor centered when searching
+keymap.set("n", "n", "nzzzv")
+keymap.set("n", "N", "Nzzzv")
+
+-- keep original yank value when pasting
+keymap.set("x", "<leader>p", '"_dP')
+
+-- yank into system clipboard
+keymap.set("n", "<leader>y", '"+y')
+keymap.set("v", "<leader>y", '"+y')
+keymap.set("n", "<leader>Y", '"+Y')
+
+-- disable Q
+keymap.set("n", "Q", "<nop>")
+
+-- switch projects with tmux
+keymap.set("n", "<C-f>", "<cmd>silent !tmux neww tmux-sessionizer<CR>")
