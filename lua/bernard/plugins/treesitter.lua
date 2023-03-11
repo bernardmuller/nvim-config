@@ -6,6 +6,13 @@ end
 treesitter.setup({
 	highlight = {
 		enable = true,
+		additional_vim_regex_highlighting = false,
+	},
+
+	rainbow = {
+		enable = true,
+		extended_mode = true,
+		max_file_lines = nil,
 	},
 	indent = { enable = true },
 	autotag = { enable = true },
@@ -25,6 +32,8 @@ treesitter.setup({
 		"vim",
 		"dockerfile",
 		"gitignore",
+		"toml",
+		"rust",
 	},
 	auto_install = true,
 })

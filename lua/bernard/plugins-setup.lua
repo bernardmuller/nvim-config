@@ -68,15 +68,15 @@ return packer.startup(function(use)
 	use("hrsh7th/cmp-buffer")
 	use("hrsh7th/cmp-path")
 
-	-- snippets
-	use("L3MON4D3/LuaSnip")
-	use("saadparwaiz1/cmp_luasnip")
-	use("rafamadriz/friendly-snippets")
-
 	-- LSP
 	-- managing and installing LSP servers
 	use("williamboman/mason.nvim")
 	use("williamboman/mason-lspconfig.nvim")
+
+	-- snippets
+	use("L3MON4D3/LuaSnip")
+	use("saadparwaiz1/cmp_luasnip")
+	use("rafamadriz/friendly-snippets")
 
 	-- configuring LSP servers
 	use("neovim/nvim-lspconfig")
@@ -84,6 +84,10 @@ return packer.startup(function(use)
 	use({ "glepnir/lspsaga.nvim", branch = "main" })
 	use("jose-elias-alvarez/typescript.nvim")
 	use("onsails/lspkind.nvim")
+	use("hrsh7th/cmp-nvim-lua")
+	use("hrsh7th/cmp-nvim-lsp-signature-help")
+	use("hrsh7th/cmp-vsnip")
+	use("hrsh7th/vim-vsnip")
 
 	--formatting and linting
 	use("jose-elias-alvarez/null-ls.nvim")
@@ -97,9 +101,19 @@ return packer.startup(function(use)
 		end,
 	})
 
+	-- debugger
+	use("mfussenegger/nvim-dap")
+	use("leoluz/nvim-dap-go")
+	use("rcarriga/nvim-dap-ui")
+	use("theHamsta/nvim-dap-virtual-text")
+	use("nvim-telescope/telescope-dap.nvim")
+	use({ "Pocco81/DAPInstall.nvim" })
+
+	--start screen
+	use("startup-nvim/startup.nvim")
 	-- auto closing
 	use("windwp/nvim-autopairs")
-	use("windwp/nvim-ts-autotag")
+	-- use("windwp/nvim-ts-autotag")
 
 	-- git signs
 	use("lewis6991/gitsigns.nvim")
@@ -110,8 +124,11 @@ return packer.startup(function(use)
 	-- copilot
 	use("github/copilot.vim")
 
-	-- better search and navigate
-	use("ggandor/leap.nvim")
+	-- which key
+	-- languages
+
+	-- rust
+	use("simrat39/rust-tools.nvim")
 
 	if packer_bootstrap then
 		require("packer").sync()

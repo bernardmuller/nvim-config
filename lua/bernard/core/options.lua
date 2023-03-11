@@ -52,3 +52,10 @@ opt.shiftwidth = 2
 opt.tabstop = 2
 opt.smartindent = true
 opt.cmdheight = 2
+
+-- Vimspector options
+vim.cmd([[
+let g:vimspector_sidebar_width = 85
+let g:vimspector_bottombar_height = 15
+let g:vimspector_terminal_maxwidth = 70
+]])
