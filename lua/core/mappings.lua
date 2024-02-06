@@ -179,12 +179,12 @@ M.lspconfig = {
       "LSP rename",
     },
 
-    ["<leader>ca"] = {
-      function()
-        vim.lsp.buf.code_action()
-      end,
-      "LSP code action",
-    },
+    -- ["<leader>ca"] = {
+    --   function()
+    --     vim.lsp.buf.code_action()
+    --   end,
+    --   "LSP code action",
+    -- },
 
     ["gr"] = {
       function()
@@ -343,14 +343,14 @@ M.nvterm = {
     },
 
     -- new
-    ["<leader>h"] = {
+    ["<leader>ht"] = {
       function()
         require("nvterm.terminal").new "horizontal"
       end,
       "New horizontal term",
     },
 
-    ["<leader>v"] = {
+    ["<leader>vt"] = {
       function()
         require("nvterm.terminal").new "vertical"
       end,

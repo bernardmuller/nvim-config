@@ -30,20 +30,20 @@ M.crates = {
   }
 }
 
-local bufnr = vim.api.nvim_get_current_buf()
-M.Rust = {
-  n = {
-    ["<leader>ca"] = {
-      function()
-        vim.cmd.RustLsp('codeAction')
-      end,
-      opts = {
-        silent = true,
-        buffer = bufnr
-      }
-    }
-  }
-}
+-- local bufnr = vim.api.nvim_get_current_buf()
+-- M.Rust = {
+--   n = {
+--     ["<leader>ca"] = {
+--       function()
+--         vim.cmd.RustLsp('codeAction')
+--       end,
+--       opts = {
+--         silent = true,
+--         buffer = bufnr
+--       }
+--     }
+--   }
+-- }
 vim.g.mapleader = " "
 
 local keymap = vim.keymap
