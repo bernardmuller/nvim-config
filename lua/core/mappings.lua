@@ -243,14 +243,14 @@ M.lspconfig = {
     },
   },
 
-  v = {
-    ["<leader>ca"] = {
-      function()
-        vim.lsp.buf.code_action()
-      end,
-      "LSP code action",
-    },
-  },
+  -- v = {
+  --   ["<leader>ca"] = {
+  --     function()
+  --       vim.lsp.buf.code_action()
+  --     end,
+  --     "LSP code action",
+  --   },
+  -- },
 }
 
 M.nvimtree = {
@@ -359,25 +359,25 @@ M.nvterm = {
   },
 }
 
-M.whichkey = {
-  plugin = true,
-
-  n = {
-    ["<leader>wK"] = {
-      function()
-        vim.cmd "WhichKey"
-      end,
-      "Which-key all keymaps",
-    },
-    ["<leader>wk"] = {
-      function()
-        local input = vim.fn.input "WhichKey: "
-        vim.cmd("WhichKey " .. input)
-      end,
-      "Which-key query lookup",
-    },
-  },
-}
+-- M.whichkey = {
+--   plugin = true,
+--
+--   n = {
+--     ["<leader>wK"] = {
+--       function()
+--         vim.cmd "WhichKey"
+--       end,
+--       "Which-key all keymaps",
+--     },
+--     ["<leader>wk"] = {
+--       function()
+--         local input = vim.fn.input "WhichKey: "
+--         vim.cmd("WhichKey " .. input)
+--       end,
+--       "Which-key query lookup",
+--     },
+--   },
+-- }
 
 M.blankline = {
   plugin = true,
