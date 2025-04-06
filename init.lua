@@ -603,6 +603,44 @@ require('lazy').setup({
       },
       indent = { enable = true, disable = { 'ruby' } },
     },
+
+    {
+      'ThePrimeagen/harpoon',
+      branch = 'harpoon2',
+      dependencies = { 'nvim-lua/plenary.nvim' },
+      config = function()
+        local harpoon = require 'harpoon'
+
+        harpoon:setup()
+
+        vim.keymap.set('n', '<leader>ha', function()
+          harpoon:list():add()
+        end, { desc = '[H]arpoon [A]dd' })
+
+        vim.keymap.set('n', '<leader>he', function()
+          harpoon.ui:toggle_quick_menu(harpoon:list())
+        end, { desc = '[H]arpoon [E]explore' })
+
+        vim.keymap.set('n', '<C-8>', function()
+          harpoon:list():select(1)
+        end, { desc = 'Harpoon view 1' })
+        vim.keymap.set('n', '<C-9>', function()
+          harpoon:list():select(2)
+        end, { desc = 'Harpoon view 2' })
+        vim.keymap.set('n', '<C-0>', function()
+          harpoon:list():select(3)
+        end, { desc = 'Harpoon view 3' })
+
+        -- Toggle previous & next buffers stored within Harpoon list
+        vim.keymap.set('n', '<leader>h,', function()
+          harpoon:list():prev()
+        end, { desc = '[H]arpoon Previous [<]' })
+        vim.keymap.set('n', '<leader>h.', function()
+          harpoon:list():next()
+        end, { desc = '[H]arpoon Next [>]' })
+      end,
+    },
+
     {
       'yetone/avante.nvim',
       event = 'VeryLazy',
