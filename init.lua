@@ -47,8 +47,8 @@ vim.keymap.set('i', 'jk', '<ESC>', { desc = 'Exit insert mode with a quick "jk"'
 vim.keymap.set('n', '<leader>E', vim.cmd.Explore, { desc = 'View File Explorer' })
 vim.keymap.set('v', 'J', ":m '>+1<CR>gv=gv", { desc = 'Move hightlighted code up' })
 vim.keymap.set('v', 'K', ":m '<-2<CR>gv=gv", { desc = 'Move hightlighted code down' })
-vim.keymap.set('n', '<C-,>', '<C-d>zz', { desc = 'Navigate have page up' })
-vim.keymap.set('n', '<C-.>', '<C-u>zz', { desc = 'Navigate have page down' })
+vim.keymap.set('n', '<C-,>', '<C-d>zz', { desc = 'Navigate half page up' })
+vim.keymap.set('n', '<C-.>', '<C-u>zz', { desc = 'Navigate half page down' })
 vim.keymap.set('n', 'n', 'nzzzv', { desc = 'Keep cursor centered when searching' })
 vim.keymap.set('n', 'N', 'Nzzzv', { desc = 'Keep cursor centered when searching' })
 vim.keymap.set('x', '<leader>p', '"_dP', { desc = 'keep original yank value when pasting' })
@@ -133,7 +133,7 @@ require('lazy').setup({
 
       -- Document existing key chains
       spec = {
-        { '<leader>c', group = '[C]ode', mode = { 'n', 'x' } },
+        { '<leader>c', group = '[C]ode',     mode = { 'n', 'x' } },
         { '<leader>d', group = '[D]ocument' },
         { '<leader>r', group = '[R]ename' },
         { '<leader>s', group = '[S]earch' },
@@ -158,13 +158,18 @@ require('lazy').setup({
         end,
       },
       { 'nvim-telescope/telescope-ui-select.nvim' },
-      { 'nvim-tree/nvim-web-devicons', enabled = vim.g.have_nerd_font },
+      { 'nvim-tree/nvim-web-devicons',            enabled = vim.g.have_nerd_font },
     },
     config = function()
       require('telescope').setup {
         extensions = {
           ['ui-select'] = {
             require('telescope.themes').get_dropdown(),
+          },
+        },
+        pickers = {
+          find_files = {
+            theme = 'ivy',
           },
         },
       }
@@ -183,7 +188,7 @@ require('lazy').setup({
       vim.keymap.set('n', '<leader>sd', builtin.diagnostics, { desc = '[S]earch [D]iagnostics' })
       vim.keymap.set('n', '<leader>sr', builtin.resume, { desc = '[S]earch [R]esume' })
       vim.keymap.set('n', '<leader>s.', builtin.oldfiles, { desc = '[S]earch Recent Files ("." for repeat)' })
-      vim.keymap.set('n', '<leader><leader>', builtin.buffers, { desc = '[ ] Find existing buffers' })
+      vim.keymap.set('n', '<leader><leader>', builtin.find_files, { desc = '[ ] Find existing files' })
 
       vim.keymap.set('n', '<leader>/', function()
         -- You can pass additional configuration to Telescope to change the theme, layout, etc.
@@ -193,8 +198,6 @@ require('lazy').setup({
         })
       end, { desc = '[/] Fuzzily search in current buffer' })
 
-      -- It's also possible to pass additional configuration options.
-      --  See `:help telescope.builtin.live_grep()` for information about particular keys
       vim.keymap.set('n', '<leader>s/', function()
         builtin.live_grep {
           grep_open_files = true,
@@ -227,7 +230,7 @@ require('lazy').setup({
       'WhoIsSethDaniel/mason-tool-installer.nvim',
 
       -- Useful status updates for LSP.
-      { 'j-hui/fidget.nvim', opts = {} },
+      { 'j-hui/fidget.nvim',       opts = {} },
 
       -- Allows extra capabilities provided by nvim-cmp
       'hrsh7th/cmp-nvim-lsp',
@@ -326,17 +329,17 @@ require('lazy').setup({
       capabilities = vim.tbl_deep_extend('force', capabilities, require('cmp_nvim_lsp').default_capabilities())
 
       local servers = {
-        -- clangd = {},
-        -- gopls = {},
         pyright = {},
         rust_analyzer = {},
-        -- ... etc. See `:help lspconfig-all` for a list of all the pre-configured LSPs
-        ts_ls = {},
+        ts_ls = {
+          settings = {
+            preferences = {
+              disableSuggestions = true,
+            },
+          },
+        },
 
         lua_ls = {
-          -- cmd = { ... },
-          -- filetypes = { ... },
-          -- capabilities = {},
           settings = {
             Lua = {
               completion = {
@@ -355,7 +358,8 @@ require('lazy').setup({
         'ts_ls',
         'clangd',
         'tailwindcss',
-        'eslint',
+        'eslint-lsp',
+        'prettierd',
       })
       require('mason-tool-installer').setup { ensure_installed = ensure_installed }
 
@@ -368,6 +372,7 @@ require('lazy').setup({
             -- This handles overriding only values explicitly passed
             -- by the server configuration above. Useful when disabling
             -- certain features of an LSP (for example, turning off formatting for ts_ls)
+
             server.capabilities = vim.tbl_deep_extend('force', {}, capabilities, server.capabilities or {})
             require('lspconfig')[server_name].setup(server)
           end,
@@ -376,45 +381,41 @@ require('lazy').setup({
     end,
   },
 
-  { -- Autoformat
-    'stevearc/conform.nvim',
-    event = { 'BufWritePre' },
-    cmd = { 'ConformInfo' },
-    keys = {
-      {
-        '<leader>f',
-        function()
-          require('conform').format { async = true, lsp_format = 'fallback' }
+  {
+    'nvimtools/none-ls.nvim',
+    dependencies = {
+      'nvimtools/none-ls-extras.nvim',
+      'jayp0521/mason-null-ls.nvim',
+    },
+    config = function()
+      local null_ls = require 'null-ls'
+      local formatting = null_ls.builtins.formatting
+      local augroup = vim.api.nvim_create_augroup('LspFormatting', {})
+
+      null_ls.setup {
+        sources = {
+          require 'none-ls.diagnostics.eslint_d',
+          null_ls.builtins.formatting.prettierd,
+          formatting.shfmt.with { args = { '-i', '4' } },
+          formatting.stylua,
+        },
+        on_attach = function(client, bufnr)
+          if client.supports_method 'textDocument/formatting' then
+            vim.api.nvim_clear_autocmds {
+              group = augroup,
+              buffer = bufnr,
+            }
+            vim.api.nvim_create_autocmd('BufWritePre', {
+              group = augroup,
+              buffer = bufnr,
+              callback = function()
+                vim.lsp.buf.format { bufnr = bufnr }
+              end,
+            })
+          end
         end,
-        mode = '',
-        desc = '[F]ormat buffer',
-      },
-    },
-    opts = {
-      notify_on_error = false,
-      format_on_save = function(bufnr)
-        -- Disable "format_on_save lsp_fallback" for languages that don't
-        -- have a well standardized coding style. You can add additional
-        -- languages here or re-enable it for the disabled ones.
-        local disable_filetypes = { c = true, cpp = true }
-        if disable_filetypes[vim.bo[bufnr].filetype] then
-          return nil
-        else
-          return {
-            timeout_ms = 500,
-            lsp_format = 'fallback',
-          }
-        end
-      end,
-      formatters_by_ft = {
-        lua = { 'stylua' },
-        -- Conform can also run multiple formatters sequentially
-        -- python = { "isort", "black" },
-        --
-        -- You can use 'stop_after_first' to run the first available formatter from the list
-        -- javascript = { "prettierd", "prettier", stop_after_first = true },
-      },
-    },
+      }
+    end,
   },
 
   { -- Autocompletion
@@ -475,8 +476,8 @@ require('lazy').setup({
           ['<C-p>'] = cmp.mapping.select_prev_item(),
 
           -- Scroll the documentation window [b]ack / [f]orward
-          ['<C-b>'] = cmp.mapping.scroll_docs(-4),
-          ['<C-f>'] = cmp.mapping.scroll_docs(4),
+          -- ['<C-b>'] = cmp.mapping.scroll_docs(-4),
+          -- ['<C-f>'] = cmp.mapping.scroll_docs(4),
 
           -- Accept ([y]es) the completion.
           --  This will auto-import if your LSP supports it.
@@ -529,13 +530,41 @@ require('lazy').setup({
   },
 
   {
-    'navarasu/onedark.nvim',
-    priority = 1000,
+    'windwp/nvim-ts-autotag',
+    ft = { 'javascript', 'javascriptreact', 'typescript', 'typescriptreact' },
     config = function()
-      require('onedark').setup {
-        style = 'warmer',
+      require('nvim-ts-autotag').setup()
+    end,
+  },
+
+  {
+    'rebelot/kanagawa.nvim',
+    config = function()
+      require('kanagawa').setup {
+        compile = false,  -- enable compiling the colorscheme
+        undercurl = true, -- enable undercurls
+        commentStyle = { italic = true },
+        functionStyle = {},
+        keywordStyle = { italic = true },
+        statementStyle = { bold = true },
+        typeStyle = {},
+        transparent = false,   -- do not set background color
+        dimInactive = false,   -- dim inactive window `:h hl-NormalNC`
+        terminalColors = true, -- define vim.g.terminal_color_{0,17}
+        colors = {             -- add/modify theme and palette colors
+          palette = {},
+          theme = { wave = {}, lotus = {}, dragon = {}, all = {} },
+        },
+        overrides = function(colors) -- add/modify highlights
+          return {}
+        end,
+        theme = 'dragon',  -- Load "wave" theme
+        background = {     -- map the value of 'background' option to a theme
+          dark = 'dragon', -- try "dragon" !
+          light = 'dragon',
+        },
       }
-      require('onedark').load()
+      vim.cmd 'colorscheme kanagawa'
     end,
   },
 
@@ -632,12 +661,12 @@ require('lazy').setup({
         end, { desc = 'Harpoon view 3' })
 
         -- Toggle previous & next buffers stored within Harpoon list
-        vim.keymap.set('n', '<leader>h,', function()
+        vim.keymap.set('n', '<leader>hm', function()
           harpoon:list():prev()
-        end, { desc = '[H]arpoon Previous [<]' })
-        vim.keymap.set('n', '<leader>h.', function()
+        end, { desc = '[H]arpoon [M]ove Back' })
+        vim.keymap.set('n', '<leader>hn', function()
           harpoon:list():next()
-        end, { desc = '[H]arpoon Next [>]' })
+        end, { desc = '[H]arpoon Move [N]ext' })
       end,
     },
 
@@ -646,19 +675,6 @@ require('lazy').setup({
       event = 'VeryLazy',
       version = false, -- Never set this value to "*"! Never!
       opts = {
-        -- add any opts here
-        -- for example
-        -- provider = 'openai',
-        -- openai = {
-        --   endpoint = 'https://api.openai.com/v1',
-        --   model = 'gpt-4o', -- your desired model (or use gpt-4o, etc.)
-        --   timeout = 30000, -- Timeout in milliseconds, increase this for reasoning models
-        --   temperature = 0,
-        --   max_tokens = 8192, -- Increase this to include reasoning tokens (for reasoning models)
-        --   --reasoning_effort = "medium", -- low|medium|high, only used for reasoning models
-        -- },
-        --
-
         provider = 'claude',
         claude = {
           endpoint = 'https://api.anthropic.com',
@@ -669,21 +685,19 @@ require('lazy').setup({
           disable_tools = true, -- disable tools!
         },
       },
-      -- if you want to build from source then do `make BUILD_FROM_SOURCE=true`
       build = 'make',
-      -- build = "powershell -ExecutionPolicy Bypass -File Build.ps1 -BuildFromSource false" -- for windows
       dependencies = {
         'nvim-treesitter/nvim-treesitter',
         'stevearc/dressing.nvim',
         'nvim-lua/plenary.nvim',
         'MunifTanjim/nui.nvim',
         --- The below dependencies are optional,
-        'echasnovski/mini.pick', -- for file_selector provider mini.pick
+        'echasnovski/mini.pick',         -- for file_selector provider mini.pick
         'nvim-telescope/telescope.nvim', -- for file_selector provider telescope
-        'hrsh7th/nvim-cmp', -- autocompletion for avante commands and mentions
-        'ibhagwan/fzf-lua', -- for file_selector provider fzf
-        'nvim-tree/nvim-web-devicons', -- or echasnovski/mini.icons
-        'zbirenbaum/copilot.lua', -- for providers='copilot'
+        'hrsh7th/nvim-cmp',              -- autocompletion for avante commands and mentions
+        'ibhagwan/fzf-lua',              -- for file_selector provider fzf
+        'nvim-tree/nvim-web-devicons',   -- or echasnovski/mini.icons
+        'zbirenbaum/copilot.lua',        -- for providers='copilot'
         {
           -- support for image pasting
           'HakonHarnes/img-clip.nvim',
@@ -709,6 +723,47 @@ require('lazy').setup({
           },
           ft = { 'markdown', 'Avante' },
         },
+      },
+    },
+
+    {
+      'Exafunction/codeium.nvim',
+      dependencies = {
+        'nvim-lua/plenary.nvim',
+        'hrsh7th/nvim-cmp',
+      },
+      config = function()
+        require('codeium').setup {
+          key_bindings = {
+            accept = '<Tab>',
+            accept_word = false,
+            accept_line = false,
+            clear = false,
+            next = '<C-n>',
+            prev = '<C-p>',
+          },
+        }
+      end,
+    },
+
+    {
+      'kdheepak/lazygit.nvim',
+      lazy = true,
+      cmd = {
+        'LazyGit',
+        'LazyGitConfig',
+        'LazyGitCurrentFile',
+        'LazyGitFilter',
+        'LazyGitFilterCurrentFile',
+      },
+      -- optional for floating window border decoration
+      dependencies = {
+        'nvim-lua/plenary.nvim',
+      },
+      -- setting the keybinding for LazyGit with 'keys' is recommended in
+      -- order to load the plugin when the command is run for the first time
+      keys = {
+        { '<leader>lg', '<cmd>LazyGit<cr>', desc = 'LazyGit' },
       },
     },
   },
@@ -760,8 +815,3 @@ require('lazy').setup({
     },
   },
 })
-
--- The line beneath this is called `modeline`. See `:help modeline`
--- vim: ts=2 sts=2 sw=2 et
---
---
