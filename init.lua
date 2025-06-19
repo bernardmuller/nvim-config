@@ -133,7 +133,7 @@ require('lazy').setup({
 
       -- Document existing key chains
       spec = {
-        { '<leader>c', group = '[C]ode',     mode = { 'n', 'x' } },
+        { '<leader>c', group = '[C]ode', mode = { 'n', 'x' } },
         { '<leader>d', group = '[D]ocument' },
         { '<leader>r', group = '[R]ename' },
         { '<leader>s', group = '[S]earch' },
@@ -158,7 +158,7 @@ require('lazy').setup({
         end,
       },
       { 'nvim-telescope/telescope-ui-select.nvim' },
-      { 'nvim-tree/nvim-web-devicons',            enabled = vim.g.have_nerd_font },
+      { 'nvim-tree/nvim-web-devicons', enabled = vim.g.have_nerd_font },
     },
     config = function()
       require('telescope').setup {
@@ -230,7 +230,7 @@ require('lazy').setup({
       'WhoIsSethDaniel/mason-tool-installer.nvim',
 
       -- Useful status updates for LSP.
-      { 'j-hui/fidget.nvim',       opts = {} },
+      { 'j-hui/fidget.nvim', opts = {} },
 
       -- Allows extra capabilities provided by nvim-cmp
       'hrsh7th/cmp-nvim-lsp',
@@ -348,6 +348,7 @@ require('lazy').setup({
             },
           },
         },
+        zls = {},
       }
 
       local ensure_installed = vim.tbl_keys(servers or {})
@@ -360,6 +361,7 @@ require('lazy').setup({
         'tailwindcss',
         'eslint-lsp',
         'prettierd',
+        'zls',
       })
       require('mason-tool-installer').setup { ensure_installed = ensure_installed }
 
@@ -381,41 +383,80 @@ require('lazy').setup({
     end,
   },
 
-  {
-    'nvimtools/none-ls.nvim',
-    dependencies = {
-      'nvimtools/none-ls-extras.nvim',
-      'jayp0521/mason-null-ls.nvim',
-    },
-    config = function()
-      local null_ls = require 'null-ls'
-      local formatting = null_ls.builtins.formatting
-      local augroup = vim.api.nvim_create_augroup('LspFormatting', {})
+  -- {
+  --   'nvimtools/none-ls.nvim',
+  --   dependencies = {
+  --     'nvimtools/none-ls-extras.nvim',
+  --     'jayp0521/mason-null-ls.nvim',
+  --   },
+  --   config = function()
+  --     local null_ls = require 'null-ls'
+  --     local formatting = null_ls.builtins.formatting
+  --     local augroup = vim.api.nvim_create_augroup('LspFormatting', {})
+  --
+  --     null_ls.setup {
+  --       sources = {
+  --         require 'none-ls.diagnostics.eslint_d',
+  --         null_ls.builtins.formatting.prettierd,
+  --         formatting.shfmt.with { args = { '-i', '4' } },
+  --         formatting.stylua,
+  --       },
+  --       on_attach = function(client, bufnr)
+  --         if client.supports_method 'textDocument/formatting' then
+  --           vim.api.nvim_clear_autocmds {
+  --             group = augroup,
+  --             buffer = bufnr,
+  --           }
+  --           vim.api.nvim_create_autocmd('BufWritePre', {
+  --             group = augroup,
+  --             buffer = bufnr,
+  --             callback = function()
+  --               vim.lsp.buf.format { bufnr = bufnr }
+  --             end,
+  --           })
+  --         end
+  --       end,
+  --     }
+  --   end,
+  -- },
 
-      null_ls.setup {
-        sources = {
-          require 'none-ls.diagnostics.eslint_d',
-          null_ls.builtins.formatting.prettierd,
-          formatting.shfmt.with { args = { '-i', '4' } },
-          formatting.stylua,
-        },
-        on_attach = function(client, bufnr)
-          if client.supports_method 'textDocument/formatting' then
-            vim.api.nvim_clear_autocmds {
-              group = augroup,
-              buffer = bufnr,
-            }
-            vim.api.nvim_create_autocmd('BufWritePre', {
-              group = augroup,
-              buffer = bufnr,
-              callback = function()
-                vim.lsp.buf.format { bufnr = bufnr }
-              end,
-            })
-          end
+  { -- Autoformat
+    'stevearc/conform.nvim',
+    lazy = false,
+    keys = {
+      {
+        '<leader>f',
+        function()
+          require('conform').format { async = true, lsp_fallback = true }
         end,
-      }
-    end,
+        mode = '',
+        desc = '[F]ormat buffer',
+      },
+    },
+    opts = {
+      notify_on_error = false,
+      format_on_save = function(bufnr)
+        -- Disable "format_on_save lsp_fallback" for languages that don't
+        -- have a well standardized coding style. You can add additional
+        -- languages here or re-enable it for the disabled ones.
+        local disable_filetypes = { cpp = true }
+        return {
+          timeout_ms = 500,
+          lsp_fallback = not disable_filetypes[vim.bo[bufnr].filetype],
+        }
+      end,
+      formatters_by_ft = {
+        lua = { 'stylua' },
+        zig = { 'zig fmt' },
+        c = { 'clang-format' },
+        -- Conform can also run multiple formatters sequentially
+        -- python = { "isort", "black" },
+        --
+        -- You can use a sub-list to tell conform to run *until* a formatter
+        -- is found.
+        javascript = { { 'prettierd', 'prettier' } },
+      },
+    },
   },
 
   { -- Autocompletion
@@ -538,33 +579,18 @@ require('lazy').setup({
   },
 
   {
-    'rebelot/kanagawa.nvim',
+    'catppuccin/nvim',
+    name = 'catppuccin',
+    priority = 1000,
     config = function()
-      require('kanagawa').setup {
-        compile = false,  -- enable compiling the colorscheme
-        undercurl = true, -- enable undercurls
-        commentStyle = { italic = true },
-        functionStyle = {},
-        keywordStyle = { italic = true },
-        statementStyle = { bold = true },
-        typeStyle = {},
-        transparent = false,   -- do not set background color
-        dimInactive = false,   -- dim inactive window `:h hl-NormalNC`
-        terminalColors = true, -- define vim.g.terminal_color_{0,17}
-        colors = {             -- add/modify theme and palette colors
-          palette = {},
-          theme = { wave = {}, lotus = {}, dragon = {}, all = {} },
-        },
-        overrides = function(colors) -- add/modify highlights
-          return {}
-        end,
-        theme = 'dragon',  -- Load "wave" theme
-        background = {     -- map the value of 'background' option to a theme
-          dark = 'dragon', -- try "dragon" !
-          light = 'dragon',
+      require('catppuccin').setup {
+        color_overrides = {
+          all = {
+            base = '#191922',
+          },
         },
       }
-      vim.cmd 'colorscheme kanagawa'
+      vim.cmd.colorscheme 'catppuccin'
     end,
   },
 
@@ -692,12 +718,12 @@ require('lazy').setup({
         'nvim-lua/plenary.nvim',
         'MunifTanjim/nui.nvim',
         --- The below dependencies are optional,
-        'echasnovski/mini.pick',         -- for file_selector provider mini.pick
+        'echasnovski/mini.pick', -- for file_selector provider mini.pick
         'nvim-telescope/telescope.nvim', -- for file_selector provider telescope
-        'hrsh7th/nvim-cmp',              -- autocompletion for avante commands and mentions
-        'ibhagwan/fzf-lua',              -- for file_selector provider fzf
-        'nvim-tree/nvim-web-devicons',   -- or echasnovski/mini.icons
-        'zbirenbaum/copilot.lua',        -- for providers='copilot'
+        'hrsh7th/nvim-cmp', -- autocompletion for avante commands and mentions
+        'ibhagwan/fzf-lua', -- for file_selector provider fzf
+        'nvim-tree/nvim-web-devicons', -- or echasnovski/mini.icons
+        'zbirenbaum/copilot.lua', -- for providers='copilot'
         {
           -- support for image pasting
           'HakonHarnes/img-clip.nvim',
