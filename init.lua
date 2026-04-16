@@ -80,18 +80,13 @@ end ---@diagnostic disable-next-line: undefined-field
 vim.opt.rtp:prepend(lazypath)
 
 require('lazy').setup({
-  'tpope/vim-sleuth',
+  -- { 'tpope/vim-sleuth' },
+  { 'nmac427/guess-indent.nvim' },
+  config = function()
+    require('guess-indent').setup {}
+  end,
   {
     'lewis6991/gitsigns.nvim',
-    opts = {
-      signs = {
-        add = { text = '+' },
-        change = { text = '~' },
-        delete = { text = '_' },
-        topdelete = { text = '‾' },
-        changedelete = { text = '~' },
-      },
-    },
   },
 
   {
@@ -228,8 +223,8 @@ require('lazy').setup({
   {
     'neovim/nvim-lspconfig',
     dependencies = {
-      { 'williamboman/mason.nvim', opts = {} },
-      'williamboman/mason-lspconfig.nvim',
+      { 'mason-org/mason.nvim', opts = {} },
+      'mason-org/mason-lspconfig.nvim',
       'WhoIsSethDaniel/mason-tool-installer.nvim',
 
       -- Useful status updates for LSP.
@@ -580,20 +575,16 @@ require('lazy').setup({
       require('nvim-ts-autotag').setup()
     end,
   },
-
   {
-    'catppuccin/nvim',
-    name = 'catppuccin',
+    'ribru17/bamboo.nvim',
+    lazy = false,
     priority = 1000,
     config = function()
-      require('catppuccin').setup {
-        color_overrides = {
-          all = {
-            base = '#191922',
-          },
-        },
+      require('bamboo').setup {
+        -- style = 'multiplex',
+        transparent = true,
       }
-      vim.cmd.colorscheme 'catppuccin'
+      require('bamboo').load()
     end,
   },
 
@@ -661,118 +652,149 @@ require('lazy').setup({
       },
       indent = { enable = true, disable = { 'ruby' } },
     },
+  },
+  {
+    'ThePrimeagen/harpoon',
+    branch = 'harpoon2',
+    dependencies = { 'nvim-lua/plenary.nvim' },
+    config = function()
+      local harpoon = require 'harpoon'
 
-    {
-      'ThePrimeagen/harpoon',
-      branch = 'harpoon2',
-      dependencies = { 'nvim-lua/plenary.nvim' },
-      config = function()
-        local harpoon = require 'harpoon'
+      harpoon:setup()
 
-        harpoon:setup()
+      vim.keymap.set('n', '<leader>ha', function()
+        harpoon:list():add()
+      end, { desc = '[H]arpoon [A]dd' })
 
-        vim.keymap.set('n', '<leader>ha', function()
-          harpoon:list():add()
-        end, { desc = '[H]arpoon [A]dd' })
+      vim.keymap.set('n', '<leader>he', function()
+        harpoon.ui:toggle_quick_menu(harpoon:list())
+      end, { desc = '[H]arpoon [E]explore' })
 
-        vim.keymap.set('n', '<leader>he', function()
-          harpoon.ui:toggle_quick_menu(harpoon:list())
-        end, { desc = '[H]arpoon [E]explore' })
+      vim.keymap.set('n', '<C-8>', function()
+        harpoon:list():select(1)
+      end, { desc = 'Harpoon view 1' })
+      vim.keymap.set('n', '<C-9>', function()
+        harpoon:list():select(2)
+      end, { desc = 'Harpoon view 2' })
+      vim.keymap.set('n', '<C-0>', function()
+        harpoon:list():select(3)
+      end, { desc = 'Harpoon view 3' })
 
-        vim.keymap.set('n', '<C-8>', function()
-          harpoon:list():select(1)
-        end, { desc = 'Harpoon view 1' })
-        vim.keymap.set('n', '<C-9>', function()
-          harpoon:list():select(2)
-        end, { desc = 'Harpoon view 2' })
-        vim.keymap.set('n', '<C-0>', function()
-          harpoon:list():select(3)
-        end, { desc = 'Harpoon view 3' })
+      -- Toggle previous & next buffers stored within Harpoon list
+      vim.keymap.set('n', '<leader>hm', function()
+        harpoon:list():prev()
+      end, { desc = '[H]arpoon [M]ove Back' })
+      vim.keymap.set('n', '<leader>hn', function()
+        harpoon:list():next()
+      end, { desc = '[H]arpoon Move [N]ext' })
+    end,
+  },
 
-        -- Toggle previous & next buffers stored within Harpoon list
-        vim.keymap.set('n', '<leader>hm', function()
-          harpoon:list():prev()
-        end, { desc = '[H]arpoon [M]ove Back' })
-        vim.keymap.set('n', '<leader>hn', function()
-          harpoon:list():next()
-        end, { desc = '[H]arpoon Move [N]ext' })
-      end,
+  {
+    'kdheepak/lazygit.nvim',
+    lazy = true,
+    cmd = {
+      'LazyGit',
+      'LazyGitConfig',
+      'LazyGitCurrentFile',
+      'LazyGitFilter',
+      'LazyGitFilterCurrentFile',
     },
-
-    {
-      'Exafunction/codeium.nvim',
-      dependencies = {
-        'nvim-lua/plenary.nvim',
-        'hrsh7th/nvim-cmp',
-      },
-      config = function()
-        require('codeium').setup {
-          key_bindings = {
-            accept = '<Tab>',
-            accept_word = false,
-            accept_line = false,
-            clear = false,
-            next = '<C-n>',
-            prev = '<C-p>',
-          },
-        }
-      end,
+    -- optional for floating window border decoration
+    dependencies = {
+      'nvim-lua/plenary.nvim',
     },
-
-    {
-      'kdheepak/lazygit.nvim',
-      lazy = true,
-      cmd = {
-        'LazyGit',
-        'LazyGitConfig',
-        'LazyGitCurrentFile',
-        'LazyGitFilter',
-        'LazyGitFilterCurrentFile',
-      },
-      -- optional for floating window border decoration
-      dependencies = {
-        'nvim-lua/plenary.nvim',
-      },
-      -- setting the keybinding for LazyGit with 'keys' is recommended in
-      -- order to load the plugin when the command is run for the first time
-      keys = {
-        { '<leader>lg', '<cmd>LazyGit<cr>', desc = 'LazyGit' },
-      },
-    },
-
-    {
-      'greggh/claude-code.nvim',
-      dependencies = {
-        'nvim-lua/plenary.nvim', -- Required for git operations
-      },
-      config = function()
-        require('claude-code').setup {
-          window = {
-            position = 'float',
-            enter_insert = true,
-            float = {
-              width = '90%', -- Take up 90% of the editor width
-              height = '90%', -- Take up 90% of the editor height
-              row = 'center', -- Center vertically
-              col = 'center', -- Center horizontally
-              relative = 'editor',
-              border = 'rounded', -- Use double border style
-            },
-          },
-          keymaps = {
-            toggle = {
-              normal = false,
-              variants = {
-                continue = '<leader>cc',
-                verbose = '<leader>cv',
-              },
-            },
-          },
-        }
-      end,
+    -- setting the keybinding for LazyGit with 'keys' is recommended in
+    -- order to load the plugin when the command is run for the first time
+    keys = {
+      { '<leader>lg', '<cmd>LazyGit<cr>', desc = 'LazyGit' },
     },
   },
 
+  {
+    'greggh/claude-code.nvim',
+    dependencies = {
+      'nvim-lua/plenary.nvim', -- Required for git operations
+    },
+    config = function()
+      require('claude-code').setup {
+        window = {
+          position = 'float',
+          enter_insert = true,
+          float = {
+            width = '90%', -- Take up 90% of the editor width
+            height = '90%', -- Take up 90% of the editor height
+            row = 'center', -- Center vertically
+            col = 'center', -- Center horizontally
+            relative = 'editor',
+            border = 'rounded', -- Use double border style
+          },
+        },
+        keymaps = {
+          toggle = {
+            normal = false,
+            variants = {
+              continue = '<leader>cc',
+              verbose = '<leader>cv',
+            },
+          },
+        },
+      }
+    end,
+  },
+
+  {
+    'sphamba/smear-cursor.nvim',
+    opts = {},
+  },
+
+  {
+    'folke/flash.nvim',
+    event = 'VeryLazy',
+    opts = {},
+    keys = {
+      {
+        'zk',
+        mode = { 'n', 'x', 'o' },
+        function()
+          require('flash').jump()
+        end,
+        desc = 'Flash',
+      },
+      {
+        'S',
+        mode = { 'n', 'x', 'o' },
+        function()
+          require('flash').treesitter()
+        end,
+        desc = 'Flash Treesitter',
+      },
+      {
+        'r',
+        mode = 'o',
+        function()
+          require('flash').remote()
+        end,
+        desc = 'Remote Flash',
+      },
+      {
+        'R',
+        mode = { 'o', 'x' },
+        function()
+          require('flash').treesitter_search()
+        end,
+        desc = 'Treesitter Search',
+      },
+      {
+        '<c-s>',
+        mode = { 'c' },
+        function()
+          require('flash').toggle()
+        end,
+        desc = 'Toggle Flash Search',
+      },
+    },
+  },
   -- The following comments only work if you have downloaded the kickstart repo, not just copy pasted the
   -- init.lua. If you want these files, they are in the repository, so you can just download them and
   -- place them in the correct locations.
